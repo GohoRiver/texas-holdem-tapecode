@@ -432,7 +432,7 @@ function stopHostScan(){
       if(!roomPlayers[targetId]) return;
       hostPeerId = targetId;
       isHost = false;
-      try { channel.send({ type:'broadcast', event:'host_transferred', payload:{ newHostPeerId: targetId, oldHostPeerId: myId } }); } catch(e){}
+      try { channel.send({ type:'broadcast', event:'host_transferred', payload:{ newHostPeerId: targetId } }); } catch(e){}
       /* 停止自己的公告 */
       stopAnnounce();
       broadcastPlayerList();
