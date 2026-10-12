@@ -855,6 +855,7 @@ function showRebuy(){
       } else if(window.PokerOnline && PokerOnline.send){
         PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
         appToast(isEn() ? "Rebuy request sent" : "补码请求已发送，等待房主确认", "success");
+        render();
       }
       return;
     }

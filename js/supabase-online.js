@@ -480,6 +480,12 @@ channel.on('broadcast', { event: 'sync_request' }, (payload) => {
       if(onMessage) onMessage({ type: 'player_action', ...payload.payload });
     });
 
+    /* ★ 玩家请求补码（房主处理） */
+    channel.on('broadcast', { event: 'rebuy' }, (payload) => {
+      if(!isHost) return;
+      if(onMessage) onMessage({ type: 'rebuy', ...payload.payload });
+    });
+
     channel.on('broadcast', { event: 'chat' }, (payload) => {
       if(onMessage) onMessage({ type: 'chat', ...payload.payload });
     });
