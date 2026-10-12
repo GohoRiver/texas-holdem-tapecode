@@ -573,7 +573,7 @@ function endHandAi(totalPot){
   } catch(e){ console.warn('save hand history failed', e); }
   refreshHistoryPanelsIfOpen();
   render();
-  if(me.chips <= 0){ setTimeout(showRebuy, 800); return; }
+  if(me.chips <= 0){ setTimeout(showRebuy, 4000); return; }
   offerShowCards();
   beginNextHandCountdown(startNewHandAi);
 }
@@ -751,7 +751,7 @@ function resolveAi(cont){
     } catch(e){ console.warn('save hand history failed', e); }
     refreshHistoryPanelsIfOpen();
     render();
-    if(me.chips <= 0){ setTimeout(showRebuy, 800); return; }
+    if(me.chips <= 0){ setTimeout(showRebuy, 4000); return; }
     offerShowCards();
     beginNextHandCountdown(startNewHandAi);
   }
@@ -825,7 +825,7 @@ function showRebuy(){
     let amount = G._rebuyMultiplier;
     if(amount < minBuy) amount = minBuy;
     $("rebuyOverlay").classList.add("hidden");
-    const me = G.players[myIndex()];
+    const me = G.players.find(p => p.peerId === PokerOnline.getMyId()) || G.players[myIndex()];
     me.chips = amount;
     me.seated = true;
     me.folded = false;
@@ -834,7 +834,6 @@ function showRebuy(){
     render();
     if(G.online.active && !G.online.isHost && window.PokerOnline && PokerOnline.send){
       PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
-      appToast(isEn() ? "Rebuy request sent" : "补码请求已发送，等待房主确认", "success");
       return;
     }
     if(G.gameMode === 'ai'){
@@ -1064,6 +1063,7 @@ async function startNewHandHost(){
         console.error('[deal] 手牌已存在，取消本手', e);
         log(isEn() ? 'Deal conflict, abort this hand' : '发牌冲突，本手作废', 'hl');
 
+        G.handNumber++;
         setTimeout(function(){ if(G.online.isHost) returnToWaiting(); }, 1500);
         return;
       }
@@ -1434,7 +1434,7 @@ function endHandHost(totalPot){
   offerShowCards();
 
   if(me && me.chips <= 0){
-    setTimeout(showRebuy, 800);
+    setTimeout(showRebuy, 4000);
     return;
   }
 
