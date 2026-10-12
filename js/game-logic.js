@@ -832,6 +832,11 @@ function showRebuy(){
     G.sessionBuyIn += amount;
     PokerAudio.play('chip');
     render();
+    if(G.online.active && !G.online.isHost && window.PokerOnline && PokerOnline.send){
+      PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
+      appToast(isEn() ? "Rebuy request sent" : "补码请求已发送，等待房主确认", "success");
+      return;
+    }
     if(G.gameMode === 'ai'){
       let ai = PokerStorage.getAiChips();
       if(ai < amount){ PokerStorage.addAiChips(amount - ai + 5000); ai = PokerStorage.getAiChips(); }
@@ -854,20 +859,6 @@ function showRebuy(){
         if(window.PokerOnline && PokerOnline.clearAllReady) PokerOnline.clearAllReady();
         broadcastFullState();
         returnToWaiting();
-      } else if(window.PokerOnline && PokerOnline.send){
-        PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
-        appToast(isEn() ? "Rebuy request sent" : "补码请求已发送，等待房主确认", "success");
-        render();
-        if(G._rebuySyncTimer) clearTimeout(G._rebuySyncTimer);
-        G._rebuySyncTimer = setTimeout(function(){
-          G._rebuySyncTimer = null;
-          if(!G.online.active || G.online.isHost) return;
-          const meNow = G.players[myIndex()];
-          if(meNow && meNow.chips < amount){
-            meNow.chips = amount;
-            render();
-          }
-        }, 1500);
       }
       return;
     }
