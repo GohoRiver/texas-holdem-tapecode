@@ -1019,6 +1019,7 @@ async function startNewHandHost(){
     return;
   }
   G._dealingInProgress = true;
+  try {
 
   if(G.online.isHost && window.PokerOnline && PokerOnline._promoteWantingSpectators){
     try { PokerOnline._promoteWantingSpectators(); } catch(e){}
@@ -1058,7 +1059,7 @@ async function startNewHandHost(){
       if(e.code === 409){
         console.error('[deal] 手牌已存在，取消本手', e);
         log(isEn() ? 'Deal conflict, abort this hand' : '发牌冲突，本手作废', 'hl');
-        G._dealingInProgress = false;
+
         setTimeout(function(){ if(G.online.isHost) returnToWaiting(); }, 1500);
         return;
       }
@@ -1150,7 +1151,10 @@ async function startNewHandHost(){
   startPreflopHost();
   broadcastFullState();
   runHostTurn();
-  G._dealingInProgress = false;
+  } finally {
+    // 无论成功、抛错还是 409 提前 return，锁都在这里释放
+    G._dealingInProgress = false;
+  }
 }
 function startPreflopHost(){
   const n = G.players.length;
@@ -1560,4 +1564,5 @@ function doHumanAction(action){
   } else {
     runTurnAi();
   }
+
 }
