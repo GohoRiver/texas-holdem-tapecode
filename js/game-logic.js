@@ -826,12 +826,6 @@ function showRebuy(){
     if(amount < minBuy) amount = minBuy;
     $("rebuyOverlay").classList.add("hidden");
     const me = G.players.find(p => p.peerId === PokerOnline.getMyId()) || G.players[myIndex()];
-    me.chips = amount;
-    me.seated = true;
-    me.folded = false;
-    G.sessionBuyIn += amount;
-    PokerAudio.play('chip');
-    render();
     if(G.online.active && !G.online.isHost && window.PokerOnline && PokerOnline.send){
       PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
       return;
