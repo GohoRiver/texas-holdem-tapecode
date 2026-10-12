@@ -826,6 +826,12 @@ function showRebuy(){
     if(amount < minBuy) amount = minBuy;
     $("rebuyOverlay").classList.add("hidden");
     const me = G.players[myIndex()];
+    me.chips = amount;
+    me.seated = true;
+    me.folded = false;
+    G.sessionBuyIn += amount;
+    PokerAudio.play('chip');
+    render();
     if(G.gameMode === 'ai'){
       let ai = PokerStorage.getAiChips();
       if(ai < amount){ PokerStorage.addAiChips(amount - ai + 5000); ai = PokerStorage.getAiChips(); }
@@ -841,10 +847,6 @@ function showRebuy(){
         return;
       }
     }
-    me.chips = amount;
-    G.sessionBuyIn += amount;
-    PokerAudio.play('chip');
-
     if(G.online.active){
       $("rebuyOverlay").classList.add("hidden");
       if(G.online.isHost){
