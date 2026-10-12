@@ -856,6 +856,16 @@ function showRebuy(){
         PokerOnline.send('rebuy', { peerId: PokerOnline.getMyId(), amount: amount });
         appToast(isEn() ? "Rebuy request sent" : "补码请求已发送，等待房主确认", "success");
         render();
+        if(G._rebuySyncTimer) clearTimeout(G._rebuySyncTimer);
+        G._rebuySyncTimer = setTimeout(function(){
+          G._rebuySyncTimer = null;
+          if(!G.online.active || G.online.isHost) return;
+          const meNow = G.players[myIndex()];
+          if(meNow && meNow.chips < amount){
+            meNow.chips = amount;
+            render();
+          }
+        }, 1500);
       }
       return;
     }
