@@ -1297,22 +1297,43 @@ function showdownHost(){
   log(t("showdownHeader"), "hl");
   PokerAudio.play('showdown');
   const cont = G.players.filter(function(p){ return p.seated !== false && !p.folded; });
+  const needReveal = cont.filter(function(p){ return !p.holeCards || p.holeCards.length < 2; });
+  if(needReveal.length > 0 && G.online.isHost){
+    console.log('[showdown] 需要玩家揭晓底牌，广播 request_reveal');
+    PokerOnline.sendRequestReveal({ handNumber: G.handNumber });
+  }
   cont.forEach(function(p){ p.revealCards = false; p._highlight = null; });
   render();
   broadcastFullState();
-  let idx = 0;
-  function next(){
-    if(idx >= cont.length){ setTimeout(function(){ resolveHost(cont); }, 800); return; }
-    const p = cont[idx];
-    p.revealCards = true;
-    render();
-    broadcastFullState();
-    PokerAudio.play('deal');
-    log(t("reveals",{name:p.name,cards:p.holeCards.map(function(c){return c.display;}).join("  ")}), "showdown");
-    idx++;
-    setTimeout(next, 650);
+  const startWait = Date.now();
+  const waitReveal = function(){
+    const stillMissing = cont.filter(function(p){ return !p.holeCards || p.holeCards.length < 2; });
+    if(stillMissing.length > 0 && Date.now() - startWait < 800){
+      setTimeout(waitReveal, 100);
+      return;
+    }
+    startRevealAnimation();
+  };
+  if(needReveal.length > 0 && G.online.isHost){
+    waitReveal();
+    return;
   }
-  next();
+  function startRevealAnimation(){
+    let idx = 0;
+    function next(){
+      if(idx >= cont.length){ setTimeout(function(){ resolveHost(cont); }, 800); return; }
+      const p = cont[idx];
+      p.revealCards = true;
+      render();
+      broadcastFullState();
+      PokerAudio.play('deal');
+      log(t("reveals",{name:p.name,cards:p.holeCards.map(function(c){return c.display;}).join("  ")}), "showdown");
+      idx++;
+      setTimeout(next, 650);
+    }
+    next();
+  }
+  startRevealAnimation();
 }
 
 function resolveHost(cont){
