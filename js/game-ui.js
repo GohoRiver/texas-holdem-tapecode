@@ -644,6 +644,7 @@ function render(){
   } else if(G.stage !== 'showdown'){
     G._deltaShown = false;
   }
+  refreshSideHistory();
 }
 
 function renderWaitingTable(container){
@@ -1364,6 +1365,7 @@ function refreshHistoryPanelsIfOpen(){
   if(el2 && mBody && !el2.classList.contains('hidden')){
     mBody.innerHTML = html;
   }
+  refreshSideHistory();
 }
 
 function openInGameHistory(){
@@ -1379,11 +1381,22 @@ function openInGameHistory(){
   if(mobileBody){
     mobileBody.innerHTML = html;
   }
+  refreshSideHistory();
   if(window.PokerAudio) PokerAudio.play('click');
 }
 function closeInGameHistory(){
   const el = document.getElementById('inGameHistory');
   if(el) el.classList.add('hidden');
+}
+
+function refreshSideHistory(){
+  const el = document.getElementById('sideHistoryBody');
+  if(!el) return;
+  const list = PokerStorage.getHandHistory ? PokerStorage.getHandHistory() : [];
+  const sig = list.length + ':' + (list[0] ? list[0].ts : 0);
+  if(G._lastSideHistorySig === sig) return;
+  G._lastSideHistorySig = sig;
+  el.innerHTML = renderHistoryList(list);
 }
 
 /* ================= 结算面板 & 飘字 ================= */
