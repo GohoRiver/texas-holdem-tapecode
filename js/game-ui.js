@@ -689,7 +689,10 @@ function renderWaitingTable(container){
           '<div><span class="seat-style">P2P</span></div>' +
         '</div>' +
       '</div>' +
-      '<div class="seat-chips">' + fmtNum((G._onlineLv || { buyMax: 10000 }).buyMax) + ' ' + t("chips") + '</div>' +
+      '<div class="seat-chips">' + fmtNum((function(){
+  const gp = G.players.find(function(x){ return x.peerId === p.peerId; });
+  return gp ? gp.chips : ((G._onlineLv || { buyMax: 10000 }).buyMax);
+})()) + ' ' + t("chips") + '</div>' +
       '<div class="seat-bet">' + (isEn() ? 'Seat ' : '座位 ') + (seatIdx + 1) + '</div>';
     container.appendChild(seat);
   }
