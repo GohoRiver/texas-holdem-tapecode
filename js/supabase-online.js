@@ -5,6 +5,7 @@ window.PokerOnline = (function(){
   let supabase = null;
   let channel = null;
   let myId = null;
+  let myAuthUid = null;
   let nickname = 'Player';
   let currentRoomId = null;
   let isHost = false;
@@ -40,6 +41,7 @@ async function upsertMyPubkey(roomId, peerId){
     if(!roomExists){
       const { error: roomErr } = await sb.from('rooms').upsert({
         room_id: roomId,
+        owner_id: myAuthUid,
         mode: roomInfo.mode || 'points',
         level: roomInfo.level || 'nano',
         small_blind: 100,
@@ -69,6 +71,7 @@ async function upsertMyPubkey(roomId, peerId){
         peer_id: peerId,
         name: nickname,
         pubkey: pubkeyStr,
+        owner_id: myAuthUid,
         seat: 0,
         chips: 10000
       }, { onConflict: 'room_id,peer_id' });   // ★ 直接 upsert，不管存不存在
@@ -113,11 +116,30 @@ async function waitSeatedPubkeys(timeoutMs){
 
   function init(){
     if(!window.supabase) return Promise.reject(new Error('Supabase SDK not loaded'));
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: 'poker_auth_session' }
+    });
     myId = 'p-' + Math.random().toString(36).slice(2, 10);
     nickname = PokerStorage.getNickname() || 'Player';
-    try { initLobbyChannel(); } catch(e){}
-    return Promise.resolve();
+
+    return (async function(){
+      try {
+        const userRes = await supabase.auth.getUser();
+        const existingUser = userRes && userRes.data && userRes.data.user;
+        if(existingUser && existingUser.id){
+          myAuthUid = existingUser.id;
+          console.log('[auth] 恢复匿名会话 uid =', myAuthUid.slice(0,8) + '...');
+        } else {
+          const signRes = await supabase.auth.signInAnonymously();
+          if(signRes && signRes.error) throw signRes.error;
+          myAuthUid = signRes.data.user.id;
+          console.log('[auth] 新建匿名会话 uid =', myAuthUid.slice(0,8) + '...');
+        }
+      } catch(e){
+        console.warn('[auth] 匿名登录失败，RLS 策略可能拒绝写库', e);
+      }
+      try { initLobbyChannel(); } catch(e){}
+    })();
   }
 
   function setMessageCallback(cb){ onMessage = cb; }
@@ -995,6 +1017,7 @@ resetActionSeq();
     requestState,
     setMessageCallback, setPlayersCallback, setRoomsCallback, toggleReady,
     becomeHost,
+    getMyAuthUid: function(){ return myAuthUid; },
     getMyId: function(){ return myId; },
     getRoomId: function(){ return currentRoomId; },
     getRoomPlayers: function(){ return roomPlayers; },
