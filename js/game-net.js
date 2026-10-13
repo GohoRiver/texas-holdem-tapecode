@@ -384,7 +384,7 @@ function applyFullState(state){
   if(meNow && meNow.chips <= 0 && meNow.seated !== false && handOver){
     if(G._rebuyShownFor !== handKey){
       G._rebuyShownFor = handKey;
-      setTimeout(showRebuy, 500);
+      setTimeout(showRebuy, 8000);
     }
   } else if(meNow && meNow.chips > 0){
     if(G._rebuyShownFor !== 'h' + G.handNumber) G._rebuyShownFor = 0;
@@ -542,6 +542,7 @@ function handleOnlineMessage(msg){
           p.folded = false;
         }
         if(window.PokerOnline && PokerOnline.clearAllReady) PokerOnline.clearAllReady();
+        render();
         broadcastFullState();
         const withChips = G.players.filter(function(x){
           return x.seated !== false && x.chips > 0;
