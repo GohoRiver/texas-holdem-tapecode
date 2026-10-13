@@ -1299,26 +1299,13 @@ function showdownHost(){
   const cont = G.players.filter(function(p){ return p.seated !== false && !p.folded; });
   const needReveal = cont.filter(function(p){ return !p.holeCards || p.holeCards.length < 2; });
   if(needReveal.length > 0 && G.online.isHost){
-    console.log('[showdown] 需要玩家揭晓底牌，广播 request_reveal');
+    console.log('[showdown] 广播 request_reveal');
     PokerOnline.sendRequestReveal({ handNumber: G.handNumber });
   }
-  cont.forEach(function(p){ p.revealCards = false; p._highlight = null; });
-  render();
-  broadcastFullState();
-  const startWait = Date.now();
-  const waitReveal = function(){
-    const stillMissing = cont.filter(function(p){ return !p.holeCards || p.holeCards.length < 2; });
-    if(stillMissing.length > 0 && Date.now() - startWait < 800){
-      setTimeout(waitReveal, 100);
-      return;
-    }
-    startRevealAnimation();
-  };
-  if(needReveal.length > 0 && G.online.isHost){
-    waitReveal();
-    return;
-  }
-  function startRevealAnimation(){
+  const startRevealAnimation = function(){
+    cont.forEach(function(p){ p.revealCards = false; p._highlight = null; });
+    render();
+    broadcastFullState();
     let idx = 0;
     function next(){
       if(idx >= cont.length){ setTimeout(function(){ resolveHost(cont); }, 800); return; }
@@ -1332,8 +1319,21 @@ function showdownHost(){
       setTimeout(next, 650);
     }
     next();
+  };
+  const startWait = Date.now();
+  const waitReveal = function(){
+    const stillMissing = cont.filter(function(p){ return !p.holeCards || p.holeCards.length < 2; });
+    if(stillMissing.length > 0 && Date.now() - startWait < 800){
+      setTimeout(waitReveal, 100);
+      return;
+    }
+    startRevealAnimation();
+  };
+  if(needReveal.length > 0 && G.online.isHost){
+    waitReveal();
+  } else {
+    startRevealAnimation();
   }
-  startRevealAnimation();
 }
 
 function resolveHost(cont){
