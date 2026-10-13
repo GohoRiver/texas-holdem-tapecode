@@ -232,7 +232,7 @@ function broadcastPlayerList(){
   }
 
   let hostScanTimer = null;
-const PEER_TIMEOUT_MS = 20000;
+const PEER_TIMEOUT_MS = 60000;
 
 function startHostScan(){
   if(hostScanTimer) clearInterval(hostScanTimer);
