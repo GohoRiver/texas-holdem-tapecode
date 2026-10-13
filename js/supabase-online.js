@@ -672,6 +672,10 @@ async function buildJoinPayload(roomId, peerId){
       if(onMessage) onMessage({ type: 'chat', ...payload.payload });
     });
 
+    channel.on('broadcast', { event: 'rebuy' }, (payload) => {
+      if(onMessage) onMessage({ type: 'rebuy', ...payload.payload });
+    });
+
     channel.on('broadcast', { event: 'show_cards' }, (payload) => {
       if(onMessage) onMessage({ type: 'show_cards', ...payload.payload });
     });
