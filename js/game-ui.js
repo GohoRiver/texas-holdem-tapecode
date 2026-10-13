@@ -507,7 +507,7 @@ function render(){
         (function(){
           if(!p.revealCards || p.holeCards.length < 2 || G.community.length < 3) return '';
           try {
-            const r = PokerEval.bestHand(p.holeCards.concat(G.community));
+            const r = (p._score && p._bestCards) ? { score: p._score, cards: p._bestCards } : PokerEval.bestHand(p.holeCards.concat(G.community));
             return (r && r.score) ? '<div class="seat-hand-type">' + PokerEval.nameOf(r.score) + '</div>' : '';
           } catch(e){ return ''; }
         })();
