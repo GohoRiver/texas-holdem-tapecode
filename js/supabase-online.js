@@ -494,6 +494,14 @@ channel.on('broadcast', { event: 'sync_request' }, (payload) => {
       if(onMessage) onMessage({ type: 'show_cards', ...payload.payload });
     });
 
+    channel.on('broadcast', { event: 'request_reveal' }, (payload) => {
+      if(onMessage) onMessage({ type: 'request_reveal', ...payload.payload });
+    });
+
+    channel.on('broadcast', { event: 'reveal_hole' }, (payload) => {
+      if(onMessage) onMessage({ type: 'reveal_hole', ...payload.payload });
+    });
+
     /* 客户端状态广播（房主用）*/
     channel.on('broadcast', { event: 'state_request' }, (payload) => {
       if(!isHost) return;
@@ -682,6 +690,14 @@ async function buildJoinPayload(roomId, peerId){
 
     channel.on('broadcast', { event: 'show_cards' }, (payload) => {
       if(onMessage) onMessage({ type: 'show_cards', ...payload.payload });
+    });
+
+    channel.on('broadcast', { event: 'request_reveal' }, (payload) => {
+      if(onMessage) onMessage({ type: 'request_reveal', ...payload.payload });
+    });
+
+    channel.on('broadcast', { event: 'reveal_hole' }, (payload) => {
+      if(onMessage) onMessage({ type: 'reveal_hole', ...payload.payload });
     });
 
         return new Promise(function(resolve){
@@ -972,6 +988,8 @@ resetActionSeq();
     sendFullState, sendPlayerAction, sendGameStart, sendHostLeft,
     sendChat: function(payload){ send('chat', payload); },
     sendShowCards,
+    sendRequestReveal: function(payload){ send('request_reveal', payload); },
+    sendRevealHole: function(payload){ send('reveal_hole', payload); },
     sendTakeSeat, sendLeaveSeat,
     sendKick, sendTransferHost, sendTogglePrivate,
     requestState,
