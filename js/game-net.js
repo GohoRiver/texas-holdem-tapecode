@@ -763,9 +763,7 @@ function handleOnlineMessage(msg){
         showScreen("lobby");
         renderRoomLists();
       } else {
-        appToast(isEn() ? "Host left, waiting for new host..." : "房主已离桌，等待新房主…", "error");
-        G.stage = 'waiting';
-        G.online.started = false;
+        appToast(isEn() ? "Host changed" : "房主已变更", "info");
         hideHumanActions();
         stopTurnTimer();
         showWaitingBar();
