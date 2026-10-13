@@ -481,6 +481,15 @@ function handleOnlineMessage(msg){
     }
     return;
   }
+  if(msg.type === 'reveal_hole'){
+    const p = G.players.find(function(x){ return x.peerId === msg.peerId; });
+    if(p && (!p.holeCards || p.holeCards.length < 2) && msg.cards && msg.cards.length === 2){
+      p.holeCards = normalizeCards(msg.cards);
+      console.log('[reveal] 收到玩家明文底牌:', msg.peerId, msg.cards.map(function(c){return c.rank+c.suit;}).join(' '));
+      if(G.online.isHost) render();
+    }
+    return;
+  }
   if(msg.type === 'deal_holes'){
     const data = msg.data;
     if(!data || !data.holes) return;
